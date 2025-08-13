@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ResumeCraft — Demo (Static)</title>
+  <meta name="description" content="Front-end demo of ResumeCraft for code review. Static, no server, no API keys." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printable, #printable * { visibility: visible; }
+      #printable { position: absolute; inset: 0; margin: 0; padding: 1rem; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-lg font-bold tracking-tight">ResumeCraft — Demo</h1>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="https://github.com/" class="text-slate-600 hover:text-slate-900">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4">
+    <!-- Privacy / Demo banner -->
+    <div class="mb-4 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
+      <strong class="font-semibold">Demo mode:</strong> Front‑end only. No data is sent to any server or AI API. Parsing and analysis are mocked in the browser.
+    </div>
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Left column: inputs -->
+      <div class="lg:col-span-1 space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <h2 class="text-base font-semibold mb-2">1) Upload or Paste Resume</h2>
+          <input id="fileInput" type="file" accept=".txt,.pdf,.doc,.docx" class="w-full rounded-lg border-slate-300" />
+          <div class="mt-3">
+            <label class="block text-sm font-medium mb-1" for="resumeText">Or paste resume text</label>
+            <textarea id="resumeText" class="w-full h-40 rounded-lg border-slate-300" placeholder="Paste your resume text…"></textarea>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button id="parseBtn" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Parse</button>
+            <button id="clearAll" class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:border-slate-400">Clear</button>
+          </div>
+          <p id="status" class="mt-2 text-sm text-slate-600"></p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <h2 class="text-base font-semibold mb-2">2) Target Role</h2>
+          <input id="targetRole" class="w-full rounded-lg border-slate-300" placeholder="e.g., Senior Front-End Engineer" />
+          <button id="optimizeBtn" class="mt-3 px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Optimize</button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <h2 class="text-base font-semibold mb-2">3) Export</h2>
+          <div class="flex flex-wrap gap-2">
+            <button id="printBtn" class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:border-slate-400">Print</button>
+            <button id="downloadHtml" class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:border-slate-400">Download HTML</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle column: parsed + analysis -->
+      <div class="lg:col-span-1 space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <h2 class="text-base font-semibold mb-2">Parsed Data (Mocked)</h2>
+          <pre id="parsedOut" class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-auto min-h-[8rem]"></pre>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <h2 class="text-base font-semibold mb-2">Analysis (Mocked)</h2>
+          <div id="analysisOut" class="text-sm text-slate-700 space-y-2">
+            <p>Awaiting resume…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: preview -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <h2 class="text-base font-semibold mb-2">Preview</h2>
+          <div id="preview" class="prose max-w-none text-sm">
+            <p>Paste a resume and click Parse to see a formatted preview here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Printable area -->
+  <div id="printable" class="hidden">
+    <div class="max-w-[8.5in] mx-auto">
+      <div id="printResume" class="prose prose-slate max-w-none"></div>
+    </div>
+  </div>
+
+  <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-slate-500">
+    © 2025 ResumeCraft (Demo) • Static front‑end for code review.
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
