@@ -1,104 +1,766 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ResumeCraft — Demo (Static)</title>
-  <meta name="description" content="Front-end demo of ResumeCraft for code review. Static, no server, no API keys." />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @media print {
-      body * { visibility: hidden; }
-      #printable, #printable * { visibility: visible; }
-      #printable { position: absolute; inset: 0; margin: 0; padding: 1rem; }
-    }
-  </style>
-</head>
-<body class="bg-slate-50 text-slate-900">
-  <header class="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="text-lg font-bold tracking-tight">ResumeCraft — Demo</h1>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="https://github.com/" class="text-slate-600 hover:text-slate-900">GitHub</a>
-      </nav>
-    </div>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ResumeCraft — Interactive Resume Enhancer</title>
+    <meta
+      name="description"
+      content="ResumeCraft helps job seekers optimize their resumes for ATS systems with AI-powered analysis, keyword extraction, and improvement suggestions."
+    />
+    <meta name="author" content="ResumeCraft" />
+    <meta
+      name="keywords"
+      content="resume, ATS, job search, career, optimization, keywords, interview"
+    />
 
-  <main class="max-w-6xl mx-auto p-4">
-    <!-- Privacy / Demo banner -->
-    <div class="mb-4 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
-      <strong class="font-semibold">Demo mode:</strong> Front‑end only. No data is sent to any server or AI API. Parsing and analysis are mocked in the browser.
-    </div>
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="ResumeCraft — Interactive Resume Enhancer" />
+    <meta
+      property="og:description"
+      content="Optimize your resume for ATS systems with smart analysis and improvement tips."
+    />
+    <meta property="og:type" content="website" />
 
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- Left column: inputs -->
-      <div class="lg:col-span-1 space-y-4">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h2 class="text-base font-semibold mb-2">1) Upload or Paste Resume</h2>
-          <input id="fileInput" type="file" accept=".txt,.pdf,.doc,.docx" class="w-full rounded-lg border-slate-300" />
-          <div class="mt-3">
-            <label class="block text-sm font-medium mb-1" for="resumeText">Or paste resume text</label>
-            <textarea id="resumeText" class="w-full h-40 rounded-lg border-slate-300" placeholder="Paste your resume text…"></textarea>
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>"
+    />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: [
+                'Inter',
+                'system-ui',
+                '-apple-system',
+                'BlinkMacSystemFont',
+                'Segoe UI',
+                'Roboto',
+                'sans-serif',
+              ],
+            },
+            animation: {
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'spin-slow': 'spin 2s linear infinite',
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900">
+    <!-- Skip Link for Accessibility -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-lg"
+    >
+      Skip to main content
+    </a>
+
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loadingText"
+    >
+      <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm mx-4 text-center">
+        <div class="relative w-20 h-20 mx-auto mb-4">
+          <svg
+            class="animate-spin-slow w-20 h-20"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="3"
+            />
+            <path
+              class="opacity-75 text-indigo-600"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <svg
+              class="w-8 h-8 text-indigo-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
           </div>
-          <div class="mt-3 flex gap-2">
-            <button id="parseBtn" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Parse</button>
-            <button id="clearAll" class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:border-slate-400">Clear</button>
+        </div>
+        <p id="loadingText" class="text-lg font-medium text-slate-700">Analyzing resume…</p>
+        <p class="text-sm text-slate-500 mt-2">Our AI is reviewing your resume</p>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-slate-200/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25"
+            >
+              <svg
+                class="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1
+                class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
+              >
+                ResumeCraft
+              </h1>
+              <p class="text-xs text-slate-500 hidden sm:block">Interactive Resume Enhancer</p>
+            </div>
           </div>
-          <p id="status" class="mt-2 text-sm text-slate-600"></p>
+          <nav class="flex items-center gap-4" role="navigation" aria-label="Main navigation">
+            <a
+              href="https://github.com/Epetaway/ResumeCraft-ghpages"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View source on GitHub (opens in new tab)"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill-rule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="hidden sm:inline">GitHub</span>
+            </a>
+          </nav>
         </div>
+      </div>
+    </header>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h2 class="text-base font-semibold mb-2">2) Target Role</h2>
-          <input id="targetRole" class="w-full rounded-lg border-slate-300" placeholder="e.g., Senior Front-End Engineer" />
-          <button id="optimizeBtn" class="mt-3 px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Optimize</button>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h2 class="text-base font-semibold mb-2">3) Export</h2>
-          <div class="flex flex-wrap gap-2">
-            <button id="printBtn" class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:border-slate-400">Print</button>
-            <button id="downloadHtml" class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:border-slate-400">Download HTML</button>
+    <!-- Main Content -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- Hero Banner -->
+      <div
+        class="mb-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 sm:p-8 shadow-xl shadow-indigo-500/20"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-2">Optimize Your Resume for ATS</h2>
+            <p class="text-indigo-100 max-w-2xl">
+              Get instant feedback on your resume's ATS compatibility, keyword optimization, and
+              professional formatting. Stand out to recruiters and land more interviews.
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+            <div
+              class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"
+            >
+              <svg
+                class="w-12 h-12 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Middle column: parsed + analysis -->
-      <div class="lg:col-span-1 space-y-4">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h2 class="text-base font-semibold mb-2">Parsed Data (Mocked)</h2>
-          <pre id="parsedOut" class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-auto min-h-[8rem]"></pre>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h2 class="text-base font-semibold mb-2">Analysis (Mocked)</h2>
-          <div id="analysisOut" class="text-sm text-slate-700 space-y-2">
-            <p>Awaiting resume…</p>
-          </div>
+      <!-- Demo Notice -->
+      <div
+        class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3"
+        role="alert"
+      >
+        <svg
+          class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <div>
+          <p class="text-sm text-amber-800">
+            <strong class="font-semibold">Demo mode:</strong> This is a front-end demonstration. All
+            analysis runs locally in your browser — no data is sent to any server.
+          </p>
         </div>
       </div>
 
-      <!-- Right column: preview -->
-      <div class="lg:col-span-1">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h2 class="text-base font-semibold mb-2">Preview</h2>
-          <div id="preview" class="prose max-w-none text-sm">
-            <p>Paste a resume and click Parse to see a formatted preview here.</p>
-          </div>
+      <!-- Main Grid Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column: Input & Controls -->
+        <div class="lg:col-span-4 space-y-6">
+          <!-- Upload Card -->
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            aria-labelledby="upload-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="upload-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <span
+                  class="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center text-sm font-bold"
+                  >1</span
+                >
+                Upload Your Resume
+              </h2>
+            </div>
+            <div class="p-5 space-y-4">
+              <!-- Drop Zone -->
+              <div
+                id="dropZone"
+                class="relative border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-indigo-400 hover:bg-indigo-50/30 transition-colors cursor-pointer"
+                role="button"
+                tabindex="0"
+                aria-label="Drop zone for file upload"
+              >
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept=".txt,.pdf,.doc,.docx"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  aria-label="Upload resume file"
+                />
+                <svg
+                  class="w-10 h-10 mx-auto text-slate-400 mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <p class="text-sm font-medium text-slate-700">Drag & drop your resume here</p>
+                <p class="text-xs text-slate-500 mt-1">or click to browse (.txt, .pdf, .doc)</p>
+              </div>
+
+              <!-- Text Input -->
+              <div>
+                <label for="resumeText" class="block text-sm font-medium text-slate-700 mb-2">
+                  Or paste resume text directly
+                </label>
+                <textarea
+                  id="resumeText"
+                  class="w-full h-40 px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm transition-shadow"
+                  placeholder="Paste your resume content here…"
+                  aria-describedby="resumeTextHelp"
+                ></textarea>
+                <p id="resumeTextHelp" class="text-xs text-slate-500 mt-1">
+                  For best results, include your full resume text with sections clearly labeled.
+                </p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-3">
+                <button
+                  id="parseBtn"
+                  class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                  aria-describedby="parseBtnHelp"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                  Analyze
+                </button>
+                <button
+                  id="clearAll"
+                  class="px-4 py-3 border border-slate-300 hover:border-slate-400 hover:bg-slate-50 font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                  aria-label="Clear all input and results"
+                >
+                  Clear
+                </button>
+              </div>
+              <p id="parseBtnHelp" class="sr-only">
+                Analyzes your resume for ATS compatibility and provides improvement suggestions
+              </p>
+              <p
+                id="status"
+                class="mt-3 text-sm font-medium flex items-center gap-2"
+                role="status"
+                aria-live="polite"
+              ></p>
+            </div>
+          </section>
+
+          <!-- Optimize Card -->
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            aria-labelledby="optimize-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="optimize-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <span
+                  class="w-7 h-7 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-sm font-bold"
+                  >2</span
+                >
+                Target Role
+              </h2>
+            </div>
+            <div class="p-5 space-y-4">
+              <div>
+                <label for="targetRole" class="block text-sm font-medium text-slate-700 mb-2">
+                  What position are you applying for?
+                </label>
+                <input
+                  id="targetRole"
+                  type="text"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-shadow"
+                  placeholder="e.g., Senior Front-End Engineer"
+                  aria-describedby="targetRoleHelp"
+                />
+                <p id="targetRoleHelp" class="text-xs text-slate-500 mt-1">
+                  We'll suggest role-specific keywords and improvements.
+                </p>
+              </div>
+              <button
+                id="optimizeBtn"
+                class="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                Optimize for Role
+              </button>
+            </div>
+          </section>
+
+          <!-- Export Card -->
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            aria-labelledby="export-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="export-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <span
+                  class="w-7 h-7 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-sm font-bold"
+                  >3</span
+                >
+                Export
+              </h2>
+            </div>
+            <div class="p-5">
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  id="printBtn"
+                  class="px-4 py-3 border border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                  aria-label="Print resume"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
+                  </svg>
+                  Print
+                </button>
+                <button
+                  id="downloadHtml"
+                  class="px-4 py-3 border border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                  aria-label="Download resume as HTML file"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  HTML
+                </button>
+              </div>
+              <button
+                id="copyBtn"
+                class="hidden w-full mt-3 px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                aria-label="Copy improved resume to clipboard"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                  />
+                </svg>
+                Copy to Clipboard
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Middle Column: Analysis -->
+        <div class="lg:col-span-4 space-y-6">
+          <!-- Score Card -->
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            aria-labelledby="score-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="score-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <svg
+                  class="w-5 h-5 text-indigo-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+                ATS Compatibility Score
+              </h2>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-center" aria-label="Resume score">
+                <div class="relative">
+                  <svg class="w-32 h-32 transform -rotate-90" aria-hidden="true">
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="54"
+                      stroke-width="12"
+                      fill="none"
+                      class="stroke-slate-200"
+                    />
+                    <circle
+                      id="scoreCircle"
+                      cx="64"
+                      cy="64"
+                      r="54"
+                      stroke-width="12"
+                      fill="none"
+                      class="stroke-slate-300 transition-all duration-1000"
+                      stroke-linecap="round"
+                      style="stroke-dasharray: 339.292; stroke-dashoffset: 339.292"
+                    />
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="scoreValue" class="text-4xl font-bold text-slate-900">0</span>
+                    <span class="text-sm text-slate-500">/ 100</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Strengths & Improvements -->
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            aria-labelledby="feedback-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="feedback-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <svg
+                  class="w-5 h-5 text-emerald-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Feedback
+              </h2>
+            </div>
+            <div class="p-5 space-y-5">
+              <div>
+                <h3 class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-3">
+                  ✓ Strengths
+                </h3>
+                <ul
+                  id="strengthsList"
+                  class="space-y-2 text-sm text-slate-700"
+                  aria-label="Resume strengths"
+                >
+                  <li class="text-slate-400">Awaiting analysis…</li>
+                </ul>
+              </div>
+              <hr class="border-slate-200" />
+              <div>
+                <h3 class="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-3">
+                  ⚡ Improvements
+                </h3>
+                <ul
+                  id="improvementsList"
+                  class="space-y-3 text-sm"
+                  aria-label="Suggested improvements"
+                >
+                  <li class="text-slate-400">Awaiting analysis…</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Detailed Analysis -->
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            aria-labelledby="analysis-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="analysis-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <svg
+                  class="w-5 h-5 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+                Detailed Analysis
+              </h2>
+            </div>
+            <div id="analysisOut" class="p-5 text-sm text-slate-700">
+              <p class="text-slate-400 text-center py-4">
+                Upload and analyze a resume to see detailed insights
+              </p>
+            </div>
+          </section>
+
+          <!-- Parsed Data (Collapsible) -->
+          <details class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <summary
+              class="border-b border-slate-100 px-5 py-4 bg-slate-50/50 cursor-pointer hover:bg-slate-100 transition-colors"
+            >
+              <span class="text-sm font-medium text-slate-700">View Raw Parsed Data (JSON)</span>
+            </summary>
+            <div class="p-4">
+              <pre
+                id="parsedOut"
+                class="text-xs bg-slate-900 text-slate-100 rounded-xl p-4 overflow-auto max-h-64 font-mono"
+              ></pre>
+            </div>
+          </details>
+        </div>
+
+        <!-- Right Column: Preview -->
+        <div class="lg:col-span-4">
+          <section
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden sticky top-24"
+            aria-labelledby="preview-heading"
+          >
+            <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+              <h2
+                id="preview-heading"
+                class="text-lg font-semibold text-slate-900 flex items-center gap-2"
+              >
+                <svg
+                  class="w-5 h-5 text-slate-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                Resume Preview
+              </h2>
+            </div>
+            <div id="preview" class="p-5 max-h-[calc(100vh-200px)] overflow-auto">
+              <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                <svg
+                  class="w-16 h-16 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <p class="text-center">Upload or paste your resume to see a formatted preview</p>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
-    </section>
-  </main>
+    </main>
 
-  <!-- Printable area -->
-  <div id="printable" class="hidden">
-    <div class="max-w-[8.5in] mx-auto">
-      <div id="printResume" class="prose prose-slate max-w-none"></div>
+    <!-- Printable Area -->
+    <div id="printable" class="hidden print:block">
+      <div class="max-w-[8.5in] mx-auto p-8">
+        <div id="printResume" class="prose prose-slate max-w-none"></div>
+      </div>
     </div>
-  </div>
 
-  <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-slate-500">
-    © 2025 ResumeCraft (Demo) • Static front‑end for code review.
-  </footer>
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-slate-200 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center"
+            >
+              <svg
+                class="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <span class="text-sm text-slate-600">
+              © 2025 ResumeCraft — Interactive Resume Enhancer
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">
+            A UX/UI portfolio piece demonstrating front-end design skills
+          </p>
+        </div>
+      </div>
+    </footer>
 
-  <script src="./app.js"></script>
-</body>
+    <!-- Scripts -->
+    <script src="./src/app.js"></script>
+  </body>
 </html>
