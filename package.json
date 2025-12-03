@@ -1,0 +1,23 @@
+{
+  "name": "resumecraft-ghpages",
+  "version": "1.0.0",
+  "description": "ResumeCraft - Interactive Resume Enhancer Demo. Front-end only, no server, no API keys.",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.js\" \"styles/**/*.css\" \"*.html\"",
+    "test": "echo \"Static demo - no automated tests\" && exit 0"
+  },
+  "keywords": ["resume", "ats", "career", "demo"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4"
+  }
+}
