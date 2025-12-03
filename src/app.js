@@ -86,8 +86,28 @@ const SKILL_PATTERNS = {
     'Scrum',
     'Mentoring',
     'Collaboration',
-    'Problem.solving',
+    'Problem[\\s\\-]?solving',
   ],
+};
+
+// Configuration for scoring weights
+const SCORING_CONFIG = {
+  baseScore: 40,
+  skillsMaxBonus: 20,
+  skillsPointsEach: 2,
+  experienceMaxBonus: 15,
+  experiencePointsEach: 3,
+  emailBonus: 3,
+  phoneBonus: 3,
+  linkedinBonus: 4,
+  quantifiedMaxBonus: 10,
+  quantifiedPointsEach: 2,
+  actionVerbsMaxBonus: 5,
+  atsBaseScore: 50,
+  atsNoTableBonus: 10,
+  atsKeywordsBonus: 15,
+  atsSectionsBonus: 15,
+  atsAsciiBonus: 10,
 };
 
 // ATS-friendly keywords that recruiters look for
@@ -656,30 +676,35 @@ function analyzeResume(data, originalText) {
  * Calculate overall resume score
  */
 function calculateScore(data, text) {
-  let score = 40; // Base score
+  let score = SCORING_CONFIG.baseScore;
 
-  // Skills bonus (up to 20 points)
+  // Skills bonus
   const skillCount = data.skills?.all?.length || 0;
-  score += Math.min(20, skillCount * 2);
+  score += Math.min(SCORING_CONFIG.skillsMaxBonus, skillCount * SCORING_CONFIG.skillsPointsEach);
 
-  // Experience bonus (up to 15 points)
+  // Experience bonus
   const expCount = data.experiences?.length || 0;
-  score += Math.min(15, expCount * 3);
+  score += Math.min(
+    SCORING_CONFIG.experienceMaxBonus,
+    expCount * SCORING_CONFIG.experiencePointsEach
+  );
 
-  // Contact info bonus (up to 10 points)
-  if (data.email) score += 3;
-  if (data.phone) score += 3;
-  if (data.linkedin) score += 4;
+  // Contact info bonus
+  if (data.email) score += SCORING_CONFIG.emailBonus;
+  if (data.phone) score += SCORING_CONFIG.phoneBonus;
+  if (data.linkedin) score += SCORING_CONFIG.linkedinBonus;
 
-  // Quantified achievements bonus (up to 10 points)
+  // Quantified achievements bonus
   const quantified = (text.match(/\d+%|\$[\d,]+|\d+\s*(users?|ms|seconds?)/gi) || []).length;
-  score += Math.min(10, quantified * 2);
+  score += Math.min(
+    SCORING_CONFIG.quantifiedMaxBonus,
+    quantified * SCORING_CONFIG.quantifiedPointsEach
+  );
 
-  // Action verbs bonus (up to 5 points)
-  const actionVerbs = ATS_KEYWORDS.filter((verb) =>
-    new RegExp(`\\b${verb}\\b`, 'i').test(text)
-  ).length;
-  score += Math.min(5, actionVerbs);
+  // Action verbs bonus - use pre-compiled check
+  const textLower = text.toLowerCase();
+  const actionVerbCount = ATS_KEYWORDS.filter((verb) => textLower.includes(verb)).length;
+  score += Math.min(SCORING_CONFIG.actionVerbsMaxBonus, actionVerbCount);
 
   return Math.min(100, Math.round(score));
 }
@@ -688,13 +713,15 @@ function calculateScore(data, text) {
  * Calculate ATS compatibility score
  */
 function calculateATSScore(text) {
-  let score = 50;
+  let score = SCORING_CONFIG.atsBaseScore;
 
   // Check for ATS-friendly formatting
-  if (!/[│┃┐┌└┘├┤┬┴]/.test(text)) score += 10; // No table characters
-  if (ATS_KEYWORDS.some((kw) => text.toLowerCase().includes(kw))) score += 15;
-  if (/\b(skills?|experience|education|summary)\b/i.test(text)) score += 15;
-  if (!/[^\x00-\x7F]/.test(text.replace(/[–—''""]/g, ''))) score += 10; // Mostly ASCII
+  if (!/[│┃┐┌└┘├┤┬┴]/.test(text)) score += SCORING_CONFIG.atsNoTableBonus;
+  if (ATS_KEYWORDS.some((kw) => text.toLowerCase().includes(kw)))
+    score += SCORING_CONFIG.atsKeywordsBonus;
+  if (/\b(skills?|experience|education|summary)\b/i.test(text))
+    score += SCORING_CONFIG.atsSectionsBonus;
+  if (!/[^\x00-\x7F]/.test(text.replace(/[–—''""]/g, ''))) score += SCORING_CONFIG.atsAsciiBonus;
 
   return Math.min(100, score);
 }
@@ -825,7 +852,12 @@ function generateImprovements(data, text) {
     });
   }
 
-  if (!ATS_KEYWORDS.some((v) => new RegExp(`\\b${v}ed\\b`, 'i').test(text))) {
+  // Check for past-tense action verbs more efficiently
+  const textLower = text.toLowerCase();
+  const hasActionVerbs = ['achieved', 'improved', 'developed', 'implemented', 'delivered'].some(
+    (verb) => textLower.includes(verb)
+  );
+  if (!hasActionVerbs) {
     improvements.push({
       section: 'Experience',
       tip: 'Start bullet points with action verbs (achieved, improved, developed)',
